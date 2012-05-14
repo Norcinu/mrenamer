@@ -1,0 +1,4 @@
+Small Perl script to rename music files that my ipod renamed during numerous
+fuck ups.
+
+perl -w mrenamer.pl /path/to/music/
