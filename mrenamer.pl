@@ -1,47 +1,72 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 use strict;
 use warnings;
 use Audio::Scan;
+use Cwd;
 
-if ($ARGV[0] ne "") {
-    my $work_dir = $ARGV[0];
-    my $index = substr($work_dir,-1,1);
-    if ($index ne "/") {
-        print "need to add a slash\n";
-        $work_dir .= "/";
-        print $work_dir, "\n";
+sub StartUp {
+    my ($start_dir) = $_;
+    if (-d $start_dir) {
+        if ($start_dir ne "/") {
+            $start_dir .= "/";
+            chdir $start_dir or die "Cant chdir to $start_dir\n"; 
+            my $di = cwd;
+            print $di, "\n";
+        }
     }
+    else {
+        print "Please pass a folder argument not a file.\n";
+    }    
+}
 
-    opendir(DIR, $work_dir) || die "Could not open directory: $work_dir\n";
-    
-    my @music;
-    my @directories;
+sub FindExtension {
+    my ($ext) = $_;
+    # use regex in future.
+    return substr($ext, -4);
+}
+
+# rename/check file in folder then parse all sub directories.
+sub RenameFile {
+    my ($mfile, $extension) = $@;
+
+    my $tags = Audio::Scan->scan_tags($mfile);
+    my $artist = $tags->{tags}->{TPE2};
+    my $song = $tags->{tags}->{TIT2};
+
+    if ($artist eq "" || $song eq "") {
+        print "No available tags, not renaming file $mfile.\n";
+    }
    
-    while (my $file = readdir(DIR)) {
-        next if($file =~ m/^\./);
-        
-        my $full_path = $work_dir . $file;
-        
-        push (@music, $full_path) if (-f $full_path);
-        push (@directories, $full_path) if (-d $full_path);
-    }
- 
-    closedir(DIR);
+    rename ($mfile, $artist . " " . $artist . $extension);
+}
 
-    foreach my $i(@music) {
-        my $tags = Audio::Scan->scan_tags($i);
-        print $i, "\n";
-        if ($tags->{tags}->{TPE2} eq "" || $tags->{tags}->{TIT2} eq "") {
-            print "null string $i\n";
-        } 
-        else {
-            # will need to change the -4 to find the last . and then extension
-            # because some file formats have 4 char extensions.
-            my $file_extension = substr($work_dir . $i, -4);
-            print $file_extension, "\n";
-            my $new_name = $work_dir . $tags->{tags}->{TPE2} . " " .$tags->{tags}->{TIT2};
-            #rename ($i, $new_name);
+sub ParseDirectory {
+    my $start_dir = $_;
+    if (-d $start_dir) {
+        chdir $start_dir or die "Can't chdir to $start_dir.\n";
+        my @directories;
+        my @files;
+
+        while (my $file = readdir(DIR)) {
+            next if ($file =~ m/^\./);
+
+            push(@music) if (-f $file);
+            push(@directories) if (-d $file
+        }
+        closedir(DIR);
+
+        if (length(@directories) > 0) {
+            foreach my ($i) {
+               &ParseDirectory($i);
+            }
+        }
+        
+        if (length(@files) > 0) {
+            foreach my $i (@files) {
+                my $extension = &FindExtension($i);
+                &RenameFile($i, $extension);
+            }
         }
     }
 }
