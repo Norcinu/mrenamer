@@ -1,0 +1,1 @@
+{KN, KN, KN, KN, KN,	KN, KN, KN, KN, KN,	SK, KN, KN, KN, KN}, // winline = 0, winCount = 3

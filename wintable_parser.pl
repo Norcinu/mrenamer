@@ -25,31 +25,36 @@ sub ParseDirectory($) {
 
     while (my $file = readdir(DIR)) {
 		next if ($file =~ m/^\./);
+
 		print $file, "\n";
-
-		open(F, $file) or die $!;
-		my @lines;
-		my $outcome_name = '';
-
-		while (<F>) {
-            chomp;
-			$line_counter++;
-			$outcome_name = $array_prefix . $file;
-			my $l = push(@lines, $_);
-			print $l, " ";
-			print @lines[9], " ";
-			#	print $lines[$l];
-			#print "$_\n";
-        }
 		
-		$outcomes_to_write{$outcome_name} = [@lines];
-		
-		close(F);
-		
-		push (@file_lengths, $line_counter);
-		#undef (@lines);
+		my $full_path = $_[0] . $file;
+		if (-f $_[0] . $full_path) {
+			open(F, $full_path) or die $!; 
+			my @lines;
+			my $outcome_name = '';
 
-		$line_counter = 0;
+			while (<F>) {
+				chomp;
+				$line_counter++;
+				$outcome_name = $array_prefix . $file;
+				print $_;
+				my $l = push(@lines, $_);
+#				print $l, " ";
+				#	print $lines[0], " ";
+				#	print $lines[$l];
+				#print "$_\n";
+			}
+			
+			$outcomes_to_write{$outcome_name} = [@lines];
+			
+			close(F);
+			
+			push (@file_lengths, $line_counter);
+			#undef (@lines);
+
+			$line_counter = 0;
+		}
     }
 
 	closedir(DIR);
@@ -58,9 +63,9 @@ sub ParseDirectory($) {
 sub WriteLines($) {
 #	my $array_name = keys $outcomes;
 	my $array_name = '';
-	open(F, '>>outcomes.h');
+	open(F, '>>' . $root_work_dir . 'outcomes.h');
 
-#	print F $array_name . "[" . $samples. "][15] = {\n";
+	print F $array_name . "[" . $samples. "][15] = {\n";
 	while ((my $key, my $value) = each %outcomes_to_write) {
 		print "$key $value", "\n";
 		#for (my $ctr = 0; $ctr < length($value); $ctr++) {
@@ -125,5 +130,5 @@ sub StripExtension() {
 }
 
 ParseDirectory($root_work_dir);
-#WriteLines("temp.txt");
+WriteLines("temp.txt");
 

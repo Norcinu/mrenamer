@@ -1,0 +1,1 @@
+{QN, QN, QN, QN, QN,	QN, QN, QN, QN, QN,	QN, QN, QN, QN, QN}, // winline = 0, winCount = 3
