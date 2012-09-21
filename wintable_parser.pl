@@ -39,7 +39,9 @@ sub ParseDirectory($) {
 				$line_counter++;
 				$outcome_name = $array_prefix . $file;
 				print $_;
-				my $l = push(@lines, $_);
+				push(@lines, $_);
+
+				
 #				print $l, " ";
 				#	print $lines[0], " ";
 				#	print $lines[$l];
@@ -62,10 +64,10 @@ sub ParseDirectory($) {
 
 sub WriteLines($) {
 #	my $array_name = keys $outcomes;
-	my $array_name = '';
+	my $array_name = $array_prefix.'test';
 	open(F, '>>' . $root_work_dir . 'outcomes.h');
 
-	print F $array_name . "[" . $samples. "][15] = {\n";
+	print F "unsigned char " . $array_name . "[" . $samples. "][15] = {\n";
 	while ((my $key, my $value) = each %outcomes_to_write) {
 		print "$key $value", "\n";
 		#for (my $ctr = 0; $ctr < length($value); $ctr++) {
@@ -78,7 +80,7 @@ sub WriteLines($) {
 	#foreach my $i (keys %outcomes_to_write) {
 	#	print F $i . "\n";
 	#}
-	
+		
 	print F "\n}; // End of $array_name \n\n";
 
 	close(F);
